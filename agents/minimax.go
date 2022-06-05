@@ -1,8 +1,8 @@
 package agents
 
 import (
+	"fmt"
 	"log"
-	"math"
 
 	"github.com/t73liu/connectfourai/game"
 	"github.com/t73liu/connectfourai/utils"
@@ -18,48 +18,45 @@ func (mma *MiniMaxAgent) GetMove(g *game.Game) int32 {
 	if len(validMoves) == 0 {
 		log.Fatalln("no valid moves left")
 	}
-	var bestMove int32
-	bestVal := math.Inf(-1)
-	for _, move := range validMoves {
-		err := g.MakeMove(move)
-		if err != nil {
-			log.Fatalln("Unexpected move error", err)
-		}
-		moveVal := mma.minimax(g, false, 1)
-		g.UndoMove()
-		if utils.GreaterThanFloat64(moveVal, bestVal) {
-			bestMove = move
-			bestVal = moveVal
-		}
-	}
+	bestMove, moveVal := mma.minimax(g, true, 0)
+	fmt.Printf("MiniMax chose move %d (value: %.2f)\n", bestMove, moveVal)
 	return bestMove
 }
 
-func (mma *MiniMaxAgent) minimax(g *game.Game, isMaximizer bool, depth int32) float64 {
+func (mma *MiniMaxAgent) minimax(g *game.Game, isMaximizer bool, depth int32) (int32, float64) {
 	if depth == mma.MaxDepth || g.IsGameOver() {
-		return game.Evaluate(g, depth, mma.MaximizerPiece)
+		return g.GetPreviousMove().RowIndex, game.Evaluate(g, depth, mma.MaximizerPiece)
 	}
+	var bestVal float64
+	bestMove := int32(-1)
 	if isMaximizer {
-		bestVal := utils.NegativeInfinity
+		bestVal = utils.NegativeInfinity
 		for _, move := range g.ListValidMoves() {
 			err := g.MakeMove(move)
 			if err != nil {
 				log.Fatalln("Unexpected move error", err)
 			}
-			bestVal = math.Max(bestVal, mma.minimax(g, false, depth+1))
+			_, moveVal := mma.minimax(g, false, depth+1)
+			if utils.GreaterThanFloat64(moveVal, bestVal) {
+				bestVal = moveVal
+				bestMove = move
+			}
 			g.UndoMove()
 		}
-		return bestVal
 	} else {
-		bestVal := utils.PositiveInfinity
+		bestVal = utils.PositiveInfinity
 		for _, move := range g.ListValidMoves() {
 			err := g.MakeMove(move)
 			if err != nil {
 				log.Fatalln("Unexpected move error", err)
 			}
-			bestVal = math.Min(bestVal, mma.minimax(g, true, depth+1))
+			_, moveVal := mma.minimax(g, true, depth+1)
+			if utils.LessThanFloat64(moveVal, bestVal) {
+				bestVal = moveVal
+				bestMove = move
+			}
 			g.UndoMove()
 		}
-		return bestVal
 	}
+	return bestMove, bestVal
 }

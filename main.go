@@ -20,9 +20,9 @@ func getAgent(agentType string, piece game.Piece) agent {
 	case "random":
 		return &agents.RandomAgent{}
 	case "minimax":
-		return &agents.MiniMaxAgent{MaxDepth: 4, MaximizerPiece: piece}
+		return &agents.MiniMaxAgent{MaxDepth: 5, MaximizerPiece: piece}
 	case "alphabeta":
-		return &agents.AlphaBetaAgent{MaxDepth: 4, MaximizerPiece: piece}
+		return &agents.AlphaBetaAgent{MaxDepth: 5, MaximizerPiece: piece}
 	case "negamax":
 		return nil
 	case "minimax-pruning":
