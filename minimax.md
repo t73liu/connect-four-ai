@@ -15,7 +15,7 @@ columns and diagonals for the maximizer.
 
 For example, the following board will:
 
-- X (maximizer) has a score of 17 = 4 * 2 (diagonals) + 1 * 3 (columns) + 3 * 2 (rows)
+- O (maximizer) has a score of 4 = 2 (diagonals) + 1 (columns) + 1 (rows)
 
 |   |   |   |   |   |  |   |
 |   |   |   | O |   |  |   |

@@ -24,7 +24,7 @@ func (mma *MiniMaxAgent) GetMove(g *game.Game) int32 {
 		if err != nil {
 			log.Fatalln("Unexpected move error", err)
 		}
-		moveVal := mma.minimax(g, false, 0)
+		moveVal := mma.minimax(g, false, 1)
 		g.UndoMove()
 		if moveVal > bestVal {
 			bestMove = move
@@ -63,10 +63,31 @@ func (mma *MiniMaxAgent) minimax(g *game.Game, isMaximizer bool, depth int32) fl
 	}
 }
 
-var directions = [][]int{
+var scoreDirections = [][]int{
+	// Right
 	{0, 1},
+	// Down
 	{1, 0},
+	// Down-Right
 	{1, 1},
+	// Down-Left
+	{1, -1},
+}
+
+var potentialDirections = [][]int{
+	// Right
+	{0, 1},
+	// Left
+	{0, -1},
+	// Up
+	{-1, 0},
+	// Up-Right
+	{-1, 1},
+	// Up-Left
+	{-1, -1},
+	// Down-Right
+	{1, 1},
+	// Down-Left
 	{1, -1},
 }
 
@@ -88,16 +109,33 @@ func (mma *MiniMaxAgent) evaluate(g *game.Game, depth int32) float64 {
 			if cell != mma.MaximizerPiece {
 				continue
 			}
-			for _, direction := range directions {
+			// Favour moves that connect rows, columns or diagonals.
+			for _, direction := range scoreDirections {
 				adjacentRowIndex := rowIndex + direction[0]
 				adjacentColIndex := colIndex + direction[1]
 				if game.IsWithinBounds(adjacentRowIndex, adjacentColIndex) {
 					adjacentPiece := g.Board[adjacentRowIndex][adjacentColIndex]
 					if adjacentPiece == mma.MaximizerPiece {
 						score++
+					}
+				}
+			}
+			// Favour moves that have potential for connect four with empty
+			// spaces.
+			for _, direction := range potentialDirections {
+				adjacentRowIndex := rowIndex + direction[0]
+				adjacentColIndex := colIndex + direction[1]
+				for game.IsWithinBounds(adjacentRowIndex, adjacentColIndex) {
+					adjacentPiece := g.Board[adjacentRowIndex][adjacentColIndex]
+					if adjacentPiece == mma.MaximizerPiece {
+						score += 0.2
 					} else if adjacentPiece == game.Empty {
 						score += 0.1
+					} else {
+						break
 					}
+					adjacentRowIndex += direction[0]
+					adjacentColIndex += direction[1]
 				}
 			}
 		}

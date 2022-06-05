@@ -13,14 +13,14 @@ type agent interface {
 	GetMove(g *game.Game) int32
 }
 
-func getAgent(agentType string) agent {
+func getAgent(agentType string, piece game.Piece) agent {
 	switch agentType {
 	case "human":
 		return &agents.HumanAgent{}
 	case "random":
 		return &agents.RandomAgent{}
 	case "minimax":
-		return &agents.MiniMaxAgent{MaxDepth: 4, MaximizerPiece: game.PlayerTwoPiece}
+		return &agents.MiniMaxAgent{MaxDepth: 4, MaximizerPiece: piece}
 	case "negamax":
 		return nil
 	case "minimax-pruning":
@@ -44,8 +44,8 @@ func main() {
 	)
 	flag.Parse()
 
-	agentOne := getAgent(*playerOne)
-	agentTwo := getAgent(*playerTwo)
+	agentOne := getAgent(*playerOne, game.PlayerOnePiece)
+	agentTwo := getAgent(*playerTwo, game.PlayerTwoPiece)
 	isPlayerOneTurn := true
 
 	g := game.NewGame()
