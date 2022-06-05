@@ -11,7 +11,8 @@ vertically or diagonally.
 ### Agents
 
 - [x] Random
-- [ ] [MiniMax](minimax.md)
+- [x] Human
+- [x] [MiniMax](minimax.md)
 - [ ] Alpha-Beta Pruning
 - [ ] [NegaMax](negamax.md)
 - [ ] NegaScout

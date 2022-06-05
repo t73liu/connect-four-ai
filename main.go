@@ -20,7 +20,7 @@ func getAgent(agentType string) agent {
 	case "random":
 		return &agents.RandomAgent{}
 	case "minimax":
-		return &agents.MiniMaxAgent{MaxDepth: 4}
+		return &agents.MiniMaxAgent{MaxDepth: 4, MaximizerPiece: game.PlayerTwoPiece}
 	case "negamax":
 		return nil
 	case "minimax-pruning":
@@ -34,12 +34,12 @@ func getAgent(agentType string) agent {
 func main() {
 	playerOne := flag.String(
 		"p1",
-		"",
+		"human",
 		"Agent to use for player 1",
 	)
 	playerTwo := flag.String(
 		"p2",
-		"random",
+		"minimax",
 		"Agent to use for player 2",
 	)
 	flag.Parse()
