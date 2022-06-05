@@ -13,9 +13,9 @@ The pseudocode for the algorithm will be:
 
 ```
 function minimax(node, depth, maximizingPlayer, alpha, beta) {
-  if depth = targetDepth or node is a terminal then
+  if depth == targetDepth or node is a terminal:
     return heuristicValue(node, depth)
-  if maximizingPlayer then
+  if maximizingPlayer:
     bestValue = −Infinity
     for each child of node:
       bestValue = max(bestValue, minimax(child, depth + 1, FALSE, alpha, beta))
@@ -23,9 +23,9 @@ function minimax(node, depth, maximizingPlayer, alpha, beta) {
       if beta <= alpha:
         break
     return bestValue
-  else
+  else:
     bestValue := +Infinity
-    for each child of node do
+    for each child of node:
       bestValue = min(bestValue, minimax(child, depth + 1, TRUE, alpha, beta))
       beta = min(beta, bestValue)
       if beta <= alpha:

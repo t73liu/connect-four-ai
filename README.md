@@ -14,7 +14,7 @@ vertically or diagonally.
 - [x] Human
 - [x] [MiniMax](agents/minimax.md)
 - [x] [Alpha-Beta Pruning](agents/alphabeta.md)
-- [ ] [NegaMax](agents/negamax.md)
+- [x] [NegaMax](agents/negamax.md)
 - [ ] [NegaScout](agents/negascout.md)
 - [ ] MCTS (Monte Carlo Tree Search)
 - [ ] Q-Learning

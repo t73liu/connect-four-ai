@@ -16,27 +16,27 @@ have a value of 4 for O (i.e. 2 diagonals + 1 column + 1 row). The evaluation
 function will need to handle partial boards if the depth does not reach a
 terminal node.
 
-|   |   |   |   |   |  |   |
-|   |   |   | O |   |  |   |
-|   |   | O | O |   |  |   |
-|   |   | X | X |   |  |   |
-|   |   | O | X | X |  |   |
-|   | O | X | X | O |  |   |
+    |   |   |   |   |   |  |   |
+    |   |   |   | O |   |  |   |
+    |   |   | O | O |   |  |   |
+    |   |   | X | X |   |  |   |
+    |   |   | O | X | X |  |   |
+    |   | O | X | X | O |  |   |
 
 The pseudocode for the algorithm will be:
 
 ```
 function minimax(node, depth, maximizingPlayer) {
-  if depth = targetDepth or node is a terminal then
+  if depth == targetDepth or node is a terminal:
     return heuristicValue(node, depth)
-  if maximizingPlayer then
+  if maximizingPlayer:
     bestValue = −Infinity
-    for each child of node do
+    for each child of node:
       bestValue = max(bestValue, minimax(child, depth + 1, FALSE))
     return bestValue
-  else
+  else:
     bestValue := +Infinity
-    for each child of node do
+    for each child of node:
       bestValue = min(bestValue, minimax(child, depth + 1, TRUE))
     return bestValue
 }

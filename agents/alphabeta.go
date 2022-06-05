@@ -37,7 +37,11 @@ func (aba *AlphaBetaAgent) minimax(
 	beta float64,
 ) (int32, float64) {
 	if depth == aba.MaxDepth || g.IsGameOver() {
-		return g.GetPreviousMove().RowIndex, game.Evaluate(g, depth, aba.MaximizerPiece)
+		previousMove := g.GetPreviousMove()
+		if previousMove == nil {
+			log.Fatalln("Unable to get previous move")
+		}
+		return previousMove.RowIndex, game.Evaluate(g, depth, aba.MaximizerPiece)
 	}
 	var bestVal float64
 	bestMove := int32(-1)

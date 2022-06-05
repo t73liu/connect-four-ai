@@ -25,7 +25,11 @@ func (mma *MiniMaxAgent) GetMove(g *game.Game) int32 {
 
 func (mma *MiniMaxAgent) minimax(g *game.Game, isMaximizer bool, depth int32) (int32, float64) {
 	if depth == mma.MaxDepth || g.IsGameOver() {
-		return g.GetPreviousMove().RowIndex, game.Evaluate(g, depth, mma.MaximizerPiece)
+		previousMove := g.GetPreviousMove()
+		if previousMove == nil {
+			log.Fatalln("Unable to get previous move")
+		}
+		return previousMove.RowIndex, game.Evaluate(g, depth, mma.MaximizerPiece)
 	}
 	var bestVal float64
 	bestMove := int32(-1)
