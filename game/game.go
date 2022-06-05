@@ -174,26 +174,34 @@ func (g *Game) updateState() {
 	}
 }
 
-var directions = [][]int{
-	// Up
-	{1, 0},
-	// Right
-	{0, 1},
-	// Up-Right
-	{1, 1},
-	// Up-Left
-	{1, -1},
+type direction struct {
+	rowDirection int
+	colDirection int
 }
 
-var oppositeDirections = [][]int{
-	// Down
-	{-1, 0},
-	// Left
-	{0, -1},
-	// Down-Left
-	{-1, -1},
-	// Down Right
-	{-1, 1},
+var (
+	up        = direction{rowDirection: 1}
+	down      = direction{rowDirection: -1}
+	left      = direction{colDirection: -1}
+	right     = direction{colDirection: 1}
+	upRight   = direction{rowDirection: 1, colDirection: 1}
+	upLeft    = direction{rowDirection: 1, colDirection: -1}
+	downRight = direction{rowDirection: -1, colDirection: 1}
+	downLeft  = direction{rowDirection: -1, colDirection: -1}
+)
+
+var directions = []direction{
+	up,
+	right,
+	upRight,
+	upLeft,
+}
+
+var oppositeDirections = []direction{
+	down,
+	left,
+	downLeft,
+	downRight,
 }
 
 func (g *Game) IsWinningMove() bool {
@@ -201,10 +209,10 @@ func (g *Game) IsWinningMove() bool {
 	if previousMove == nil {
 		return false
 	}
-	for i, direction := range directions {
+	for i, d := range directions {
 		count := 1
-		rowIndex := int(previousMove.RowIndex) + direction[0]
-		colIndex := int(previousMove.ColumnIndex) + direction[1]
+		rowIndex := int(previousMove.RowIndex) + d.rowDirection
+		colIndex := int(previousMove.ColumnIndex) + d.colDirection
 		for IsWithinBounds(rowIndex, colIndex) {
 			if g.Board[rowIndex][colIndex] == previousMove.Piece {
 				count++
@@ -214,12 +222,12 @@ func (g *Game) IsWinningMove() bool {
 			} else {
 				break
 			}
-			rowIndex += direction[0]
-			colIndex += direction[1]
+			rowIndex += d.rowDirection
+			colIndex += d.colDirection
 		}
 		oppositeDirection := oppositeDirections[i]
-		rowIndex = int(previousMove.RowIndex) + oppositeDirection[0]
-		colIndex = int(previousMove.ColumnIndex) + oppositeDirection[1]
+		rowIndex = int(previousMove.RowIndex) + oppositeDirection.rowDirection
+		colIndex = int(previousMove.ColumnIndex) + oppositeDirection.colDirection
 		for IsWithinBounds(rowIndex, colIndex) {
 			if g.Board[rowIndex][colIndex] == previousMove.Piece {
 				count++
@@ -229,8 +237,8 @@ func (g *Game) IsWinningMove() bool {
 			} else {
 				break
 			}
-			rowIndex += oppositeDirection[0]
-			colIndex += oppositeDirection[1]
+			rowIndex += oppositeDirection.rowDirection
+			colIndex += oppositeDirection.colDirection
 		}
 	}
 	return false

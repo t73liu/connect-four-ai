@@ -46,7 +46,7 @@ func (aba *AlphaBetaAgent) minimax(
 	beta float64,
 ) float64 {
 	if depth == aba.MaxDepth || g.IsGameOver() {
-		return evaluate(g, depth, aba.MaximizerPiece)
+		return game.Evaluate(g, depth, aba.MaximizerPiece)
 	}
 	if isMaximizer {
 		bestVal := utils.NegativeInfinity
