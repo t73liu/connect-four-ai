@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/t73liu/connectfourai/game"
+	"github.com/t73liu/connectfourai/utils"
 )
 
 type MiniMaxAgent struct {
@@ -26,7 +27,7 @@ func (mma *MiniMaxAgent) GetMove(g *game.Game) int32 {
 		}
 		moveVal := mma.minimax(g, false, 1)
 		g.UndoMove()
-		if moveVal > bestVal {
+		if utils.GreaterThanFloat64(moveVal, bestVal) {
 			bestMove = move
 			bestVal = moveVal
 		}
@@ -36,10 +37,10 @@ func (mma *MiniMaxAgent) GetMove(g *game.Game) int32 {
 
 func (mma *MiniMaxAgent) minimax(g *game.Game, isMaximizer bool, depth int32) float64 {
 	if depth == mma.MaxDepth || g.IsGameOver() {
-		return mma.evaluate(g, depth)
+		return evaluate(g, depth, mma.MaximizerPiece)
 	}
 	if isMaximizer {
-		bestVal := math.Inf(-1)
+		bestVal := utils.NegativeInfinity
 		for _, move := range g.ListValidMoves() {
 			err := g.MakeMove(move)
 			if err != nil {
@@ -50,7 +51,7 @@ func (mma *MiniMaxAgent) minimax(g *game.Game, isMaximizer bool, depth int32) fl
 		}
 		return bestVal
 	} else {
-		bestVal := math.Inf(1)
+		bestVal := utils.PositiveInfinity
 		for _, move := range g.ListValidMoves() {
 			err := g.MakeMove(move)
 			if err != nil {
@@ -91,13 +92,16 @@ var potentialDirections = [][]int{
 	{1, -1},
 }
 
-func (mma *MiniMaxAgent) evaluate(g *game.Game, depth int32) float64 {
-	if g.IsGameOver() && g.State != game.Draw {
+func evaluate(g *game.Game, depth int32, maximizerPiece game.Piece) float64 {
+	if g.IsGameOver() {
+		if g.State == game.Draw {
+			return 0
+		}
 		previousMove := g.GetPreviousMove()
 		if previousMove == nil {
 			log.Fatalln("Unable to get previous move in game over state")
 		}
-		if previousMove.Piece == mma.MaximizerPiece {
+		if previousMove.Piece == maximizerPiece {
 			return float64(1000 - depth)
 		} else {
 			return float64(-1000 + depth)
@@ -106,7 +110,7 @@ func (mma *MiniMaxAgent) evaluate(g *game.Game, depth int32) float64 {
 	var score float64
 	for rowIndex, row := range g.Board {
 		for colIndex, cell := range row {
-			if cell != mma.MaximizerPiece {
+			if cell != maximizerPiece {
 				continue
 			}
 			// Favour moves that connect rows, columns or diagonals.
@@ -115,7 +119,7 @@ func (mma *MiniMaxAgent) evaluate(g *game.Game, depth int32) float64 {
 				adjacentColIndex := colIndex + direction[1]
 				if game.IsWithinBounds(adjacentRowIndex, adjacentColIndex) {
 					adjacentPiece := g.Board[adjacentRowIndex][adjacentColIndex]
-					if adjacentPiece == mma.MaximizerPiece {
+					if adjacentPiece == maximizerPiece {
 						score++
 					}
 				}
@@ -125,15 +129,15 @@ func (mma *MiniMaxAgent) evaluate(g *game.Game, depth int32) float64 {
 			for _, direction := range potentialDirections {
 				adjacentRowIndex := rowIndex + direction[0]
 				adjacentColIndex := colIndex + direction[1]
+				var counter = 0
 				for game.IsWithinBounds(adjacentRowIndex, adjacentColIndex) {
 					adjacentPiece := g.Board[adjacentRowIndex][adjacentColIndex]
-					if adjacentPiece == mma.MaximizerPiece {
-						score += 0.2
-					} else if adjacentPiece == game.Empty {
+					if counter < 4 && (adjacentPiece == maximizerPiece || adjacentPiece == game.Empty) {
 						score += 0.1
 					} else {
 						break
 					}
+					counter++
 					adjacentRowIndex += direction[0]
 					adjacentColIndex += direction[1]
 				}

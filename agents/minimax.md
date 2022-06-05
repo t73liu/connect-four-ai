@@ -1,4 +1,4 @@
-## MiniMax
+# MiniMax
 
 MiniMax is a backtracking algorithm that alternates between two players: a
 maximizer and a minimizer. The maximizer wants the highest score possible while
