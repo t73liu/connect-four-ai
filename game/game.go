@@ -14,6 +14,7 @@ const (
 	PlayerTwoTurn
 	PlayerOneWin
 	PlayerTwoWin
+	Draw
 )
 
 func (s State) String() string {
@@ -26,6 +27,8 @@ func (s State) String() string {
 		return "Player One Win"
 	case PlayerTwoWin:
 		return "Player Two Win"
+	case Draw:
+		return "Draw"
 	}
 	return "Unknown GameState"
 }
@@ -51,7 +54,7 @@ func (p Piece) String() string {
 }
 
 type Move struct {
-	piece       Piece
+	Piece       Piece
 	RowIndex    int32
 	ColumnIndex int32
 }
@@ -96,8 +99,31 @@ func (g *Game) IsValidMove(move int32) bool {
 	return g.Board[0][move] == Empty
 }
 
+func (g *Game) GetPreviousMove() *Move {
+	moveCount := len(g.MoveHistory)
+	if moveCount == 0 {
+		return nil
+	}
+	return g.MoveHistory[moveCount-1]
+}
+
 func (g *Game) IsGameOver() bool {
-	return g.State == PlayerOneWin || g.State == PlayerTwoWin
+	return g.State == PlayerOneWin || g.State == PlayerTwoWin || g.State == Draw
+}
+
+func (g *Game) UndoMove() {
+	previousMove := g.GetPreviousMove()
+	if previousMove == nil {
+		return
+	}
+	g.MoveHistory = g.MoveHistory[:len(g.MoveHistory)-1]
+	g.Board[previousMove.RowIndex][previousMove.ColumnIndex] = Empty
+	switch previousMove.Piece {
+	case PlayerOnePiece:
+		g.State = PlayerOneTurn
+	case PlayerTwoPiece:
+		g.State = PlayerTwoTurn
+	}
 }
 
 func (g *Game) MakeMove(move int32) error {
@@ -116,7 +142,7 @@ func (g *Game) MakeMove(move int32) error {
 		if g.Board[rowIndex][move] == Empty {
 			g.Board[rowIndex][move] = piece
 			g.MoveHistory = append(g.MoveHistory, &Move{
-				piece:       piece,
+				Piece:       piece,
 				RowIndex:    int32(rowIndex),
 				ColumnIndex: move,
 			})
@@ -127,56 +153,60 @@ func (g *Game) MakeMove(move int32) error {
 	return nil
 }
 
-func (g *Game) UndoMove() {
-	// TODO
-}
-
 func (g *Game) updateState() {
 	currentState := g.State
-	if g.isWinningMove() {
+	if g.IsWinningMove() {
 		switch currentState {
 		case PlayerOneTurn:
 			g.State = PlayerOneWin
 		case PlayerTwoTurn:
 			g.State = PlayerTwoWin
 		}
-	} else {
+	} else if len(g.ListValidMoves()) != 0 {
 		switch currentState {
 		case PlayerOneTurn:
 			g.State = PlayerTwoTurn
 		case PlayerTwoTurn:
 			g.State = PlayerOneTurn
 		}
+	} else {
+		g.State = Draw
 	}
 }
 
 var directions = [][]int{
 	// Up
 	{1, 0},
-	// Up-Right
-	{1, 1},
 	// Right
 	{0, 1},
-	// Down-Right
-	{-1, 1},
-	// Down
-	{-1, 0},
-	// Down-Left
-	{-1, -1},
-	// Left
-	{0, -1},
+	// Up-Right
+	{1, 1},
 	// Up-Left
 	{1, -1},
 }
 
-func (g *Game) isWinningMove() bool {
-	lastMove := g.MoveHistory[len(g.MoveHistory)-1]
-	for _, direction := range directions {
-		var count int
-		rowIndex := int(lastMove.RowIndex)
-		colIndex := int(lastMove.ColumnIndex)
-		for isWithinBounds(rowIndex, colIndex) {
-			if g.Board[rowIndex][colIndex] == lastMove.piece {
+var oppositeDirections = [][]int{
+	// Down
+	{-1, 0},
+	// Left
+	{0, -1},
+	// Down-Left
+	{-1, -1},
+	// Down Right
+	{-1, 1},
+}
+
+func (g *Game) IsWinningMove() bool {
+	previousMove := g.GetPreviousMove()
+	if previousMove == nil {
+		return false
+	}
+	for i, direction := range directions {
+		count := 1
+		rowIndex := int(previousMove.RowIndex) + direction[0]
+		colIndex := int(previousMove.ColumnIndex) + direction[1]
+		for IsWithinBounds(rowIndex, colIndex) {
+			if g.Board[rowIndex][colIndex] == previousMove.Piece {
 				count++
 				if count == 4 {
 					return true
@@ -184,14 +214,29 @@ func (g *Game) isWinningMove() bool {
 			} else {
 				break
 			}
-			colIndex += direction[0]
-			rowIndex += direction[1]
+			rowIndex += direction[0]
+			colIndex += direction[1]
+		}
+		oppositeDirection := oppositeDirections[i]
+		rowIndex = int(previousMove.RowIndex) + oppositeDirection[0]
+		colIndex = int(previousMove.ColumnIndex) + oppositeDirection[1]
+		for IsWithinBounds(rowIndex, colIndex) {
+			if g.Board[rowIndex][colIndex] == previousMove.Piece {
+				count++
+				if count == 4 {
+					return true
+				}
+			} else {
+				break
+			}
+			rowIndex += oppositeDirection[0]
+			colIndex += oppositeDirection[1]
 		}
 	}
 	return false
 }
 
-func isWithinBounds(rowIndex, colIndex int) bool {
+func IsWithinBounds(rowIndex, colIndex int) bool {
 	return rowIndex >= 0 && rowIndex < numOfRows && colIndex >= 0 && colIndex < numOfColumns
 }
 
