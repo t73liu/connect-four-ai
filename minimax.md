@@ -11,11 +11,10 @@ account (i.e. subtract the depth from the maximizer score and add the depth to
 the minimizer score).
 
 One possible evaluation function is to count the number of connected rows,
-columns and diagonals for the maximizer.
-
-For example, the following board will:
-
-- O (maximizer) has a score of 4 = 2 (diagonals) + 1 (columns) + 1 (rows)
+columns and diagonals for the maximizer. For example, the following board will
+have a value of 4 for O (i.e. 2 diagonals + 1 column + 1 row). The evaluation
+function will need to handle partial boards if the depth does not reach a
+terminal node.
 
 |   |   |   |   |   |  |   |
 |   |   |   | O |   |  |   |
@@ -23,3 +22,22 @@ For example, the following board will:
 |   |   | X | X |   |  |   |
 |   |   | O | X | X |  |   |
 |   | O | X | X | O |  |   |
+
+The pseudocode for the algorithm will be:
+
+```
+function minimax(node, depth, maximizingPlayer) {
+  if depth = targetDepth or node is a terminal then
+    return heuristicValue(node, depth)
+  if maximizingPlayer then
+    bestValue = −Infinity
+    for each child of node do
+      bestValue = max(bestValue, minimax(child, depth + 1, FALSE))
+    return bestValue
+  else
+    bestValue := +Infinity
+    for each child of node do
+      bestValue = min(bestValue, minimax(child, depth + 1, TRUE))
+    return bestValue
+}
+```
